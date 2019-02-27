@@ -156,7 +156,7 @@ describe("INodeCallIse test suite", () => {
                 ${constants.KW.JEKI} b = [1,2,3];
                 ${constants.KW.JEKI} c = 4;
 
-                ${constants.KW.FUN} (${constants.KW.JEKI} i = 0; i < 10; ${constants.KW.JEKI} i = i + 1;) {
+                ${constants.KW.FUN} (${constants.KW.JEKI} i = 0; i < 10; ${constants.KW.JEKI} i = i + 1) {
                     ${constants.KW.PADA} i;
                 }
             }
@@ -175,7 +175,7 @@ describe("INodeCallIse test suite", () => {
                 ${constants.KW.SOPE} i;
             }
 
-            ${constants.KW.FUN} (${constants.KW.JEKI} i = 1; i <= 3; ${constants.KW.JEKI} i = i + 1;) { 
+            ${constants.KW.FUN} (${constants.KW.JEKI} i = 1; i <= 3; ${constants.KW.JEKI} i = i + 1) { 
                 output(i);
             }
         `;
@@ -184,5 +184,18 @@ describe("INodeCallIse test suite", () => {
         expect(global.console.log).toHaveBeenCalledWith(1);
         expect(global.console.log).toHaveBeenCalledWith(2);
         expect(global.console.log).toHaveBeenCalledWith(3);
+    });
+
+    test("Make sure ise can take negative values as parameters", () => {
+        parser.lexer().inputStream.code = `
+            ${constants.KW.ISE} teAropoNonba(a, b) {
+                ${constants.KW.SOPE} a + b;
+            }
+
+            teAropoNonba(-3, 2);
+        `;
+
+        mainInterpreter.interpreteProgram();
+        expect(global.console.log).toHaveBeenCalledWith(-1);
     });
 });

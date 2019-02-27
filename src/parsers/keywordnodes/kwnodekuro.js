@@ -1,5 +1,6 @@
 const constants = require("../../constants.js");
 const BaseNode = require("../basenode.js");
+const feedbackMessages = require("../../feedbackMessages.js");
 
 class KwNodeKuro extends BaseNode {
     getNode () {
@@ -7,12 +8,12 @@ class KwNodeKuro extends BaseNode {
             return KwNodeKuro.getParsedKuroNode(this);
         }
 
-        this.throwError("Yorlang Kuro keyword not expected");
+        this.throwError(feedbackMessages.unexpectedDeclaration(constants.KW.KURO));
     }
 
     static isExpectedKuroStatement (context) {
-        return context.getBlockTypeStack().indexOf(constants.KW.FUN) >= 0 ||
-                                            context.getBlockTypeStack().indexOf(constants.KW.NIGBATI) >= 0;
+        return context.getBlockTypeStack().includes(constants.KW.FUN) ||
+                                            context.getBlockTypeStack().includes(constants.KW.NIGBATI);
     }
 
     static getParsedKuroNode (context) {

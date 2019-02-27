@@ -1,4 +1,5 @@
 const constants = require("../constants.js");
+const feedbackMessages = require("../feedbackMessages.js");
 const kwnodes = require("./keywordnodes/kwnodes.js");
 const nodeLiterals = require("./nodeLiterals/nodeliterals.js");
 const BaseNode = require("./basenode.js");
@@ -12,7 +13,7 @@ class Parser {
 
     initBlockTypeStack () {
         // a work around for creating a private field with public accessors
-        var _blockTypeStack = [];
+        const _blockTypeStack = [];
         this.pushToBlockTypeStack = (blockName) => {
             _blockTypeStack.push(blockName);
         };
@@ -22,7 +23,7 @@ class Parser {
     }
 
     initIsArithmeticExpression () {
-        var _isArithmeticExpression = true;
+        let _isArithmeticExpression = true;
         this.setIsArithmeticExpression = (isArithmetic) => {
             _isArithmeticExpression = isArithmetic;
         };
@@ -46,17 +47,17 @@ class Parser {
 
     skipPunctuation (punc) {
         if (this.isNextTokenPunctuation(punc)) this.lexer().next();
-        else this.throwError(this.getGenericErrorMsg(this.getCurrentTokenValue()));
+        else this.throwError(feedbackMessages.genericErrorMsg(this.getCurrentTokenValue()));
     }
 
     skipOperator (op) {
         if (this.isNextTokenOperator(op)) this.lexer().next();
-        else this.throwError(this.getGenericErrorMsg(this.getCurrentTokenValue()));
+        else this.throwError(feedbackMessages.genericErrorMsg(this.getCurrentTokenValue()));
     }
 
     skipKeyword (kw) {
         if (this.isNextTokenKeyword(kw)) this.lexer().next();
-        else this.throwError(this.getGenericErrorMsg(this.getCurrentTokenValue()));
+        else this.throwError(feedbackMessages.genericErrorMsg(this.getCurrentTokenValue()));
     }
 
     getCurrentTokenValue () {
@@ -115,7 +116,7 @@ class Parser {
     }
 
     isNextTokenInOperatorList (operatorList) {
-        return this.isNotEndOfFile() && (operatorList.indexOf(this.lexer().peek().value) >= 0);
+        return this.isNotEndOfFile() && (operatorList.includes(this.lexer().peek().value));
     }
 
     parseNodeLiteral () {
@@ -124,17 +125,17 @@ class Parser {
         if (nodeLiterals[token.type]) {
             const nodeliteral = nodeLiterals[token.type];
             if (nodeliteral instanceof BaseNode) return nodeliteral.getNode.call(this);
-            else throw new Error(`${token.value} must be of type BaseNode`);
+            else throw new Error(feedbackMessages.baseNodeType(token.value));
         }
 
         // check if the token value is a punctuation that can be used in an expression e.g (, [
         if (nodeLiterals[constants.EXP_PUNC][token.value]) {
             const nodeliteral = nodeLiterals[constants.EXP_PUNC][token.value];
             if (nodeliteral instanceof BaseNode) return nodeliteral.getNode.call(this);
-            else throw new Error(`${token.value} must be of type BaseNode`);
+            else throw new Error(feedbackMessages.baseNodeType(token.value));
         }
 
-        this.lexer().throwError(this.getGenericErrorMsg(token.value));
+        this.lexer().throwError(feedbackMessages.genericErrorMsg(token.value));
     }
 
     parseBlock (currentBlock) {
@@ -157,7 +158,7 @@ class Parser {
     parseVarname () {
         return (this.lexer().peek().type === constants.VARIABLE)
             ? this.lexer().next().value
-            : this.lexer().throwError(this.getGenericErrorMsg(this.lexer().peek().value));
+            : this.lexer().throwError(feedbackMessages.genericErrorMsg(this.lexer().peek().value));
     }
 
     parseDelimited (start, stop, separator, parser, predicate) {
@@ -179,11 +180,7 @@ class Parser {
         var token = this.lexer().next();
         if (predicate(token)) return token;
 
-        this.throwError(this.getGenericErrorMsg(token.type));
-    }
-
-    getGenericErrorMsg (value) {
-        return `Cannot process unexpected token : ${value}`;
+        this.throwError(feedbackMessages.genericErrorMsg(token.type));
     }
 
     parseAst () {
@@ -192,16 +189,16 @@ class Parser {
         if (kwnodes[token.value]) {
             const kwNode = kwnodes[token.value];
             if (kwNode instanceof BaseNode) return kwNode.getNode.call(this); // call the method getNode in kwNode object like an extension function to the Parser class
-            else throw new Error(`${kwNode} must be of type BaseNode`);
+            else throw new Error(feedbackMessages.baseNodeType(kwNode));
         }
 
         if (token.type === constants.VARIABLE) { // then a function call is expected
             const callIseNodeLiteral = nodeLiterals[constants.CALL_ISE];
             if (callIseNodeLiteral instanceof BaseNode) return callIseNodeLiteral.getNode.call(this);
-            else throw new Error(`${callIseNodeLiteral} must be of type BaseNode`);
+            else throw new Error(feedbackMessages.baseNodeType(callIseNodeLiteral));
         }
 
-        this.throwError(this.getGenericErrorMsg(token.value));
+        this.throwError(feedbackMessages.genericErrorMsg(token.value));
     }
 
     isNotEndOfFile () {

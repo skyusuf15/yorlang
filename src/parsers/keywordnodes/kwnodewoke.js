@@ -1,5 +1,6 @@
 const constants = require("../../constants.js");
 const BaseNode = require("../basenode.js");
+const feedbackMessages = require("../../feedbackMessages.js");
 
 class KwNodeWoke extends BaseNode {
     getNode () {
@@ -7,11 +8,11 @@ class KwNodeWoke extends BaseNode {
             return KwNodeWoke.getParsedWokeNode(this);
         }
 
-        this.throwError("Yorlang woke keyword not expected in a non function(ise) block");
+        this.throwError(feedbackMessages.unexpectedDeclaration(constants.KW.WOKE));
     }
 
     static isExpectedWokeStatement (context) {
-        return context.getBlockTypeStack().indexOf(constants.KW.ISE) >= 0;
+        return context.getBlockTypeStack().includes(constants.KW.ISE);
     }
 
     static getParsedWokeNode (context) {
